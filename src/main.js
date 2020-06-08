@@ -3,7 +3,11 @@ import fs from "fs";
 import ncp from "ncp";
 import path from "path";
 import { promisify } from "util";
-import Spinner from "cli-spinners";
+const ora = require('ora');
+const spinner = new ora({
+text: `${chalk.green('Loading Files')}`,
+spinner: 'dots'
+});
 const access = promisify(fs.access);
 const copy = promisify(ncp);
 
@@ -26,13 +30,13 @@ export async function createProject(options) {
   options.templateDirectory = templateDir;
   try {
     await access(options.templateDirectory, fs.constants.R_OK);
+    spinner.start("Copying Project files");
   } catch (err) {
-    console.error(templateDir);
+    spinner.fail(err);
     process.exit(1);
   }
-  console.log("Copy Project files");
   await copyTemplateFiles(options);
-  console.log(Spinner.dots);
+  spinner.succeed("Done");
   console.log("%s Project ready", chalk.green.bold("DONE"));
   return true;
 }
