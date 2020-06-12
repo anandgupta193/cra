@@ -6,18 +6,15 @@ import { promisify } from "util";
 import execa from "execa";
 import Listr from "listr";
 import { projectInstall } from "pkg-install";
-const ora = require("ora");
-const spinner = new ora({
-  text: `${chalk.green("Loading Files")}`,
-  spinner: "dots",
-});
 const access = promisify(fs.access);
 const copy = promisify(ncp);
-
+var Git = require("nodegit");
 async function copyTemplateFiles(options) {
-  return copy(options.templateDirectory, options.targetDirectory, {
-    clobber: false,
-  });
+  // return copy(options.templateDirectory, options.targetDirectory, {
+  //   clobber: false,
+  return Git.Clone("https://github.com/shubhamsWEB/cra.git", options.targetDirectory).then(function(repository) {
+  console.log("Done cloning");
+});
 }
 async function initGit(options) {
   const result = await execa("git", ['init'], {
@@ -42,9 +39,7 @@ export async function createProject(options) {
   options.templateDirectory = templateDir;
   try {
     await access(options.templateDirectory, fs.constants.R_OK);
-    spinner.start("Copying Project files");
   } catch (err) {
-    spinner.fail(err);
     process.exit(1);
   }
   const tasks = new Listr([
@@ -70,7 +65,6 @@ export async function createProject(options) {
     },
   ]);
   await tasks.run();
-  spinner.succeed("Done");
   console.log("%s Project ready", chalk.green.bold("DONE"));
   return true;
 }
