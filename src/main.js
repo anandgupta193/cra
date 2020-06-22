@@ -2,26 +2,33 @@ import chalk from "chalk";
 import fs from "fs";
 import ncp from "ncp";
 import path from "path";
-import { promisify } from "util";
+import { promisify} from "util";
 import execa from "execa";
 import Listr from "listr";
-import { projectInstall } from "pkg-install";
+const{ execSync,exec} = require('child_process');
 const access = promisify(fs.access);
-const copy = promisify(ncp);
-var Git = require("nodegit");
+
 async function copyTemplateFiles(options) {
-  // return copy(options.templateDirectory, options.targetDirectory, {
-  //   clobber: false,
-  return Git.Clone("https://github.com/shubhamsWEB/cra.git", options.targetDirectory).then(function(repository) {
-  console.log("Done cloning");
-});
-}
+  return execSync('git clone https://github.com/shubhamsWEB/cra.git', {
+    stdio: [0, 1, 2], // we need this so node will print the command output
+    cwd: path.resolve(options.targetDirectory, ''), // path to where you want to save the file
+  })
+};
 async function initGit(options) {
   const result = await execa("git", ['init'], {
     cwd: options.targetDirectory,
   });
   if (result.failed) {
     return Promise.reject(new Error("Failed to initialize Git"));
+  }
+  return;
+}
+async function npminstall(options) {
+  const result = await execa("npm", ['install'], {
+    cwd: `${options.targetDirectory}/cra`,
+  });
+  if (result.failed) {
+    return Promise.reject(new Error("Failed to install dependences"));
   }
   return;
 }
@@ -54,13 +61,11 @@ export async function createProject(options) {
     },
     {
       title: "Installing Dependencies",
-      task: () =>
-        projectInstall({
-          cwd: options.targetDirectory,
-        }),
+      task: () => npminstall(options),
+      enabled: () => options.runInstall,
       skip: () =>
         !options.runInstall
-          ? "Enter --install to automaticall install dependencies"
+          ? "Enter --install to automaticaly install dependencies"
           : undefined,
     },
   ]);
