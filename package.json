@@ -1,6 +1,6 @@
 {
   "name": "@shubham_17/create-project",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CLI to create custom Project Boilerplate",
   "main": "src/index.js",
   "bin": {
