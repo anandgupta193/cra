@@ -45,7 +45,15 @@ async function promptMissingOptions(options) {
         questions.push({
             type: 'confirm',
             name: 'git',
-            message: 'Initialize a git repository.!',
+            message: 'Initialize a git repository',
+            default: false,
+        });
+    }
+    if(!options.runInstall) {
+        questions.push({
+            type: 'confirm',
+            name: 'dependency',
+            message: 'Install all dependency',
             default: false,
         });
     }
@@ -54,6 +62,7 @@ async function promptMissingOptions(options) {
         ...options,
         template: options.template || answers.template,
         git: options.git || answers.git,
+        runInstall: options.runInstall || answers.dependency,
     };
 }
 export async function cli(args) {
