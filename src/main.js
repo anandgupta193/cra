@@ -1,17 +1,14 @@
 import chalk from "chalk";
-import fs from "fs";
 import path from "path";
-import { promisify } from "util";
 import execa from "execa";
 import Listr from "listr";
 const { execSync, exec } = require("child_process");
-const access = promisify(fs.access);
 
 async function copyTemplateFiles(options) {
   try {
-    return execSync("git clone https://github.com/shubhamsWEB/cra.git", {
-      stdio: [0, 1, 2], // we need this so node will print the command output
-      cwd: path.resolve(options.targetDirectory, ""), // path to where you want to save the file
+    return execSync("git clone https://github.com/anandgupta193/cra.git", {
+      stdio: [0, 1, 2],
+      cwd: path.resolve(options.targetDirectory, ""),
     });
   } catch (err) {
     console.log(chalk.red.bold("Error in Cloning"));
@@ -21,7 +18,7 @@ async function copyTemplateFiles(options) {
 async function initGit(options) {
   try {
     const result = await execa("git", ["init"], {
-      stdio: [0, 1, 2], // we need this so node will print the command output
+      stdio: [0, 1, 2],
       cwd: options.targetDirectory,
     });
   } catch (err) {
@@ -30,10 +27,10 @@ async function initGit(options) {
   }
   return;
 }
-async function npminstall(options) {
+async function installnpm(options) {
   try {
     const result = await execa("npm", ["install"], {
-      stdio: [0, 1, 2], // we need this so node will print the command output
+      stdio: [0, 1, 2],
       cwd: `${options.targetDirectory}/cra`,
     });
   } catch (err) {
@@ -47,18 +44,7 @@ export async function createProject(options) {
     ...options,
     targetDirectory: options.targetDirectory || process.cwd(),
   };
-  // const templateDir = path.resolve(
-  //   new URL(__dirname).pathname,
-  //   "../templates",
 
-  //   options.template.toLowerCase()
-  // );
-  // options.templateDirectory = templateDir;
-  // try {
-  //   await access(options.templateDirectory, fs.constants.R_OK);
-  // } catch (err) {
-  //   process.exit(1);
-  // }
   const tasks = new Listr([
     {
       title: "Copying project files",
@@ -71,7 +57,7 @@ export async function createProject(options) {
     },
     {
       title: "Installing Dependencies",
-      task: () => npminstall(options),
+      task: () => installnpm(options),
       enabled: () => options.runInstall,
       skip: () =>
         !options.runInstall
